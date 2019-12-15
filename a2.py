@@ -9,8 +9,7 @@ def output(s0, s1, i):
 
 def encoder(bitstream):
     # Step 1 add 2 leading zeros to simulate state
-    bitstream.insert(0,0)
-    bitstream.insert(0,0)
+    bitstream = np.concatenate(([False, False], bitstream))
     # Initialize and empty endcoded away 
     encoded = []
     # Iterate over the original length of th input.
@@ -18,8 +17,7 @@ def encoder(bitstream):
         # Concatenate the output bits
         encoded.extend(output(bitstream[n], bitstream[n+1], bitstream[n+2]))
     # remove the added state 0 bits
-    bitstream.pop(0)
-    bitstream.pop(0)
+    bistream = bitstream[2:]
     return encoded
 
 def time_instance(n_states):
@@ -36,8 +34,8 @@ def machine(input, current):
 def Hamming_dist(bit1, bit2): return bit1 ^ bit2
 
 states = {'00': 0, '01':1, '10':2, '11':3}
+#states_inv = {0: [False,False], 1: [False,True], 2: [True,False], 3: [True,True]}
 states_inv = {0: [0,0], 1: [0,1], 2: [1,0], 3: [1,1]}
-
 def forward_decoder(encoded):
     # Initialize the empty trellis diagram
     # Has length as the bitstream + 1 for the initial state
@@ -45,7 +43,7 @@ def forward_decoder(encoded):
     # Initialize the initial state 
     instances[0][0]['prev'] = [0, 0]
     instances[0][0]['cost'] = 0
-	# loop over the timesteps
+    # loop over the timesteps
     for i in range(len(instances)-1):
         # The observed (noisy output)
         observed_op = encoded[i*3 : (i+1)*3]
@@ -56,9 +54,9 @@ def forward_decoder(encoded):
                 continue
             # calcutate the next state index
             next0state, next1state = states[machine(0,state)], states[machine(1,state)]
-			# get the bits of the current state
+            # get the bits of the current state
             state_bits = states_inv[state]
-			# use the state bits with 0 and 1 and get the output of the state-bit pair
+            # use the state bits with 0 and 1 and get the output of the state-bit pair
             op = [output(state_bits[1], state_bits[0], j) for j in [0,1]]
 			# Calculate the cost(Hamming dist) between the output and the observed output
             cost = [sum(list(map(Hamming_dist,observed_op,op[j]))) for j in [0,1]]
@@ -93,3 +91,22 @@ def viterbi_decode(instances):
     return result[::-1]
 def decode(encoded): return viterbi_decode(forward_decoder(encoded))
 
+
+def binarize(image):
+    output = []
+    for row in image:
+        for pixel in row:
+            output.extend(list(map(bool,list(map(lambda x: int(x), list(f"{pixel:08b}"))))))
+    return np.array(output, dtype= bool)
+            
+
+def de_binarize(bitstream, rows, cols):
+    image = np.zeros((rows,cols), dtype = np.uint8)
+    for pixel in range(rows*cols):
+        a = np.array(bitstream[pixel*8: pixel*8 + 8], dtype= np.int)
+        intermediate = int("".join(str(x) for x in a), 2)
+        image[np.int(pixel/cols), pixel%cols] = intermediate
+    return image
+
+def rmse(source, decoded):
+    return np.sqrt(np.mean(np.square(source - decoded)))
