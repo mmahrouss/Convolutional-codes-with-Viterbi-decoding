@@ -1,3 +1,4 @@
+import numpy as np
 # ^ is the xor operator 
 # Define the output function as per the diagram
 def output(s0, s1, i):
@@ -72,12 +73,12 @@ def forward_decoder(encoded):
             if instances[i+1][next1state]['cost'] > cost[1] + instances[i][state]['cost']:
                 instances[i+1][next1state]['prev'] = [state, 1]
                 instances[i+1][next1state]['cost'] = cost[1] + instances[i][state]['cost']
-	return instances
-def viterbi_decode(instance):
+    return instances
+def viterbi_decode(instances):
     # Get the minimum state based on cost at the last instance
     min_state = min(instances[len(instances) - 1], key = lambda x: x['cost'])
     # Get previous state and decoded bit
-    prev_state = min_state['prev'][0]
+    prev_state = instances[len(instances) - 2][min_state['prev'][0]]
     bit = min_state['prev'][1]
     # Initialize the result array
     result = [bit]
@@ -85,7 +86,7 @@ def viterbi_decode(instance):
     for inst in range(len(instances)-2,0,-1):
         # Get previous state and decoded bit
         bit = prev_state['prev'][1]
-        prev_state = prev_state['prev'][0]
+        prev_state = instances[inst -1][prev_state['prev'][0]]
         # Append to the result
         result.append(bit)
     # Return the revered array.
