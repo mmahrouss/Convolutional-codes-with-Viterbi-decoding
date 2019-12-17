@@ -2,9 +2,9 @@ import numpy as np
 # ^ is the xor operator 
 # Define the output function as per the diagram
 def output(s0, s1, i):
-    P1 = i ^ s1
-    P2 = i ^ s0
-    P3 = s1 ^ s0
+    P1 = i ^ s0
+    P2 = s1
+    P3 = i ^ s1
     return [P1,P2,P3]
 
 def encoder(bitstream):
