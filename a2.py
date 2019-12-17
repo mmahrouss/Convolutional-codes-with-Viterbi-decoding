@@ -17,7 +17,7 @@ def encoder(bitstream):
         # Concatenate the output bits
         encoded.extend(output(bitstream[n], bitstream[n+1], bitstream[n+2]))
     # remove the added state 0 bits
-    bistream = bitstream[2:]
+    bitstream = bitstream[2:]
     return encoded
 
 def time_instance(n_states):
@@ -108,7 +108,7 @@ def binarize(image):
     output = []
     for row in image:
         for pixel in row:
-            output.extend(list(map(bool,list(map(lambda x: int(x), list(f"{pixel:08b}"))))))
+            output.extend(list(map(bool,map(lambda x: int(x), list(f"{pixel:08b}")))))
     return np.array(output, dtype= bool)
             
 
@@ -120,5 +120,4 @@ def de_binarize(bitstream, rows, cols):
         image[np.int(pixel/cols), pixel%cols] = intermediate
     return image
 
-def rmse(source, decoded):
-    return np.sqrt(np.mean(np.square(source - decoded)))
+def rmse(source, decoded): return np.sqrt(np.mean(np.square(source - decoded)))
