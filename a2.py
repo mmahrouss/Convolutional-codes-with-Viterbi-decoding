@@ -67,10 +67,22 @@ def forward_decoder(encoded):
             if instances[i+1][next0state]['cost'] > cost[0] + instances[i][state]['cost']:
                 instances[i+1][next0state]['prev'] = [state, 0]
                 instances[i+1][next0state]['cost'] = cost[0] + instances[i][state]['cost']
+
+            elif instances[i+1][next0state]['cost'] == cost[0] + instances[i][state]['cost']:
+                choice = np.random.choice([True,False])
+                if choice:
+                    instances[i+1][next0state]['prev'] = [state, 0]
+                    instances[i+1][next0state]['cost'] = cost[0] + instances[i][state]['cost']
 			# repeat for the 1 bit  (solid line)
             if instances[i+1][next1state]['cost'] > cost[1] + instances[i][state]['cost']:
                 instances[i+1][next1state]['prev'] = [state, 1]
                 instances[i+1][next1state]['cost'] = cost[1] + instances[i][state]['cost']
+
+            elif instances[i+1][next1state]['cost'] == cost[1] + instances[i][state]['cost']:
+                choice = np.random.choice([True,False])
+                if choice:
+                    instances[i+1][next1state]['prev'] = [state, 1]
+                    instances[i+1][next1state]['cost'] = cost[1] + instances[i][state]['cost']    
     return instances
 def viterbi_decode(instances):
     # Get the minimum state based on cost at the last instance
